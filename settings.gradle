@@ -1,4 +1,5 @@
 rootProject.name = 'investment-calculator'
 include 'domain'
 include 'application'
+include 'infrastructure'
 
