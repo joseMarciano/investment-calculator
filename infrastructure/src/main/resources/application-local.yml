@@ -1,0 +1,8 @@
+aws:
+  sqs:
+    execution-event-changed-queue: https://sqs.us-east-1.amazonaws.com/446633124077/execution-event-changed
+
+
+redis:
+  host: localhost
+  port: 6379
