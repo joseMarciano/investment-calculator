@@ -1,5 +1,6 @@
 package com.investment.managment.execution.entity;
 
+import com.investment.managment.Identifier;
 import com.investment.managment.execution.Execution;
 import com.investment.managment.execution.ExecutionID;
 import com.investment.managment.execution.ExecutionStatus;
@@ -12,6 +13,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 
@@ -42,15 +44,21 @@ public class ExecutionRedisEntity {
     public static ExecutionRedisEntity from(final Execution execution) {
         return builder()
                 .id(execution.getId().getValue())
-                .origin(execution.getOrigin().getValue())
-                .stockId(execution.getStockId().getValue())
-                .walletId(execution.getWalletId().getValue())
+                .origin(getIdentifier(execution.getOrigin()))
+                .stockId(getIdentifier(execution.getStockId()))
+                .walletId(getIdentifier(execution.getWalletId()))
                 .profitPercentage(execution.getProfitPercentage())
                 .executedQuantity(execution.getExecutedQuantity())
                 .executedPrice(execution.getExecutedPrice())
                 .executedVolume(execution.getExecutedVolume())
                 .status(execution.getStatus())
                 .build();
+    }
+
+    private static <T> T getIdentifier(final Identifier<T> identifier) {
+        return Optional.ofNullable(identifier)
+                .map(Identifier::getValue)
+                .orElse(null);
     }
 
     public Execution toAggregate() {
