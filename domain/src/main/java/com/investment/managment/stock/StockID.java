@@ -1,24 +1,26 @@
 package com.investment.managment.stock;
 
 import com.investment.managment.Identifier;
+import lombok.NoArgsConstructor;
 
 import java.util.Objects;
 
+@NoArgsConstructor
 public class StockID extends Identifier<String> {
 
-    private final String id;
+    private String value;
 
     public static StockID from(final String aValue) {
         return new StockID(aValue);
     }
 
-    private StockID(final String id) {
-        this.id = id;
+    private StockID(final String value) {
+        this.value = value;
     }
 
     @Override
     public String getValue() {
-        return this.id;
+        return this.value;
     }
 
     @Override
@@ -26,11 +28,11 @@ public class StockID extends Identifier<String> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final StockID stockID = (StockID) o;
-        return id.equals(stockID.id);
+        return value.equals(stockID.value);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(value);
     }
 }
