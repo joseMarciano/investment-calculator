@@ -8,5 +8,9 @@ import java.util.Optional;
 public interface ExecutionGateway {
     Execution create(Execution anExecution);
 
+    Execution update(Execution anExecution);
+
     Optional<Execution> findById(ExecutionID anId);
+
+    void deleteById(ExecutionID id);
 }
