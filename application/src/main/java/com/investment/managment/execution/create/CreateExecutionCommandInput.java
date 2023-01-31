@@ -19,4 +19,26 @@ public record CreateExecutionCommandInput(
         ExecutionStatus status
 
 ) {
+
+    public static CreateExecutionCommandInput with(
+            final ExecutionID id,
+            final ExecutionID origin,
+            final StockID stockId,
+            final WalletID walletId,
+            final Double profitPercentage,
+            final Long executedQuantity,
+            final BigDecimal executedPrice,
+            final BigDecimal executedVolume,
+            final ExecutionStatus status
+    ) {
+        return new CreateExecutionCommandInput(id,
+                origin,
+                stockId,
+                walletId,
+                profitPercentage,
+                executedQuantity,
+                executedPrice,
+                executedVolume,
+                status);
+    }
 }
