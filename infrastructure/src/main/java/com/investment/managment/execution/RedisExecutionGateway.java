@@ -6,7 +6,11 @@ import com.investment.managment.repository.redis.ExecutionRedisRepository;
 import com.investment.managment.validation.exception.DomainExeceptionFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Component
 public class RedisExecutionGateway implements ExecutionGateway {
@@ -36,6 +40,15 @@ public class RedisExecutionGateway implements ExecutionGateway {
 
     private void deleteById(final Execution execution) {
         this.executionRedisRepository.deleteById(execution.getId().getValue());
+    }
+
+    @Override
+    public List<Execution> findAll() {
+        final var spliterator = this.executionRedisRepository.findAll().spliterator();
+        return StreamSupport.stream(spliterator, false)
+                .filter(Objects::nonNull)
+                .map(ExecutionRedisEntity::toAggregate)
+                .collect(Collectors.toList());
     }
 
     @Override

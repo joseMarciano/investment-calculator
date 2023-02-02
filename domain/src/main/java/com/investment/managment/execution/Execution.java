@@ -48,4 +48,22 @@ public class Execution extends AggregateRoot<ExecutionID> {
     public int hashCode() {
         return Objects.hash(getId());
     }
+
+    public BigDecimal calculatePnlOpen(final BigDecimal lastTradePrice) {
+        if(ExecutionStatus.SELL.equals(this.getStatus())) return BigDecimal.ZERO;
+
+        final var executedQuantity = BigDecimal.valueOf(this.executedQuantity);
+        return executedQuantity.multiply(
+            lastTradePrice.subtract(this.executedPrice)
+        );
+    }
+
+    public BigDecimal calculatePnlClose(final BigDecimal lastTradePrice) {
+        if(ExecutionStatus.BUY.equals(this.getStatus())) return BigDecimal.ZERO;
+
+        final var executedQuantity = BigDecimal.valueOf(this.executedQuantity);
+        return executedQuantity.multiply(
+            this.executedPrice.subtract(lastTradePrice)
+        );
+    }
 }

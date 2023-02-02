@@ -11,3 +11,11 @@ cloud:
     sqs:
       handler:
         default-deletion-policy: ON_SUCCESS
+
+
+feign:
+  client:
+    config:
+      hg-console:
+        defaultQueryParameters:
+          key: ${HG_CONSOLE_KEY}

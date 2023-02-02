@@ -3,6 +3,7 @@ package com.investment.managment.execution.gateway;
 import com.investment.managment.execution.Execution;
 import com.investment.managment.execution.ExecutionID;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ExecutionGateway {
@@ -13,4 +14,6 @@ public interface ExecutionGateway {
     Optional<Execution> findById(ExecutionID anId);
 
     void deleteById(ExecutionID id);
+
+    List<Execution> findAll();
 }
