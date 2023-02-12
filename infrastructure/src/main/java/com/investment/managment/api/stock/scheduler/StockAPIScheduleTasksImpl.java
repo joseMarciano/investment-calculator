@@ -50,16 +50,22 @@ public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
     }
 
 
+    /**
+     * Every week day at 1:30am
+     */
     @Override
-    @Scheduled(cron = "@daily")
+    @Scheduled(cron = "0 30 1 * * MON-FRI")
     public void updateOrCreateStocks() {
         Optional.ofNullable(this.investmentManagementFeignClient.getAllTickers(LIMIT))
                 .map(GetAllStocksResponse::items)
                 .ifPresent(items -> items.forEach(this::updateOrCreateStock));
     }
 
+    /**
+     * Every week day at 1:45am
+     */
     @Override
-    @Scheduled(cron = "@midnight")
+    @Scheduled(cron = "0 45 1 * * MON-FRI")
     public void verifyUpdateUsedStocks() {
         final var stocksUsed = this.executionGateway.findAll()
                 .stream().map(Execution::getStockId)
