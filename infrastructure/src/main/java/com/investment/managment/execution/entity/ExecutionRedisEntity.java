@@ -13,7 +13,12 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 
@@ -41,6 +46,8 @@ public class ExecutionRedisEntity {
 
     private ExecutionStatus status;
 
+    private Set<String> executionsSold;
+
     public static ExecutionRedisEntity from(final Execution execution) {
         return builder()
                 .id(execution.getId().getValue())
@@ -52,6 +59,7 @@ public class ExecutionRedisEntity {
                 .executedPrice(execution.getExecutedPrice())
                 .executedVolume(execution.getExecutedVolume())
                 .status(execution.getStatus())
+                .executionsSold(getExecutionsSold(execution))
                 .build();
     }
 
@@ -59,6 +67,14 @@ public class ExecutionRedisEntity {
         return Optional.ofNullable(identifier)
                 .map(Identifier::getValue)
                 .orElse(null);
+    }
+
+    private static Set<String> getExecutionsSold(final Execution execution) {
+        final Function<Set<ExecutionID>, Set<String>> map =
+                executionIDS -> executionIDS.stream().map(ExecutionRedisEntity::getIdentifier).collect(Collectors.toSet());
+        return Optional.ofNullable(execution.getExecutionsSold())
+                .map(map)
+                .orElse(Set.of());
     }
 
     public Execution toAggregate() {
@@ -72,6 +88,7 @@ public class ExecutionRedisEntity {
                 .executedPrice(this.executedPrice)
                 .executedVolume(this.executedVolume)
                 .status(this.status)
+                .executionsSold(Objects.nonNull(this.executionsSold) ? this.executionsSold.stream().map(ExecutionID::from).collect(Collectors.toSet()) : new HashSet<>())
                 .build();
     }
 }

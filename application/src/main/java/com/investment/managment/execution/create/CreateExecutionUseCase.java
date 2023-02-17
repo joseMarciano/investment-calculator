@@ -4,6 +4,8 @@ import com.investment.managment.UseCase;
 import com.investment.managment.execution.Execution;
 import com.investment.managment.execution.gateway.ExecutionGateway;
 
+import java.util.Set;
+
 import static java.util.Objects.requireNonNull;
 
 public class CreateExecutionUseCase extends UseCase<CreateExecutionCommandInput, CreateExecutionCommandOutput> {
@@ -26,6 +28,7 @@ public class CreateExecutionUseCase extends UseCase<CreateExecutionCommandInput,
                 .executedPrice(aCommand.executedPrice())
                 .executedVolume(aCommand.executedVolume())
                 .status(aCommand.status())
+                .executionsSold(Set.of())
                 .build();
 
         return CreateExecutionCommandOutput.from(executionGateway.create(aExecution));

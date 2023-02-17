@@ -26,6 +26,10 @@ public record ExecutionChangedRequest(
 
     ) {
 
+        public static ExecutionDTO with(final ExecutionID anId, final ExecutionID originId, final ExecutionStatus status){
+            return new ExecutionDTO(anId, originId, null, null, null ,null, null, null, status);
+        }
+
     }
 }
 

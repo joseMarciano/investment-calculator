@@ -26,6 +26,7 @@ public class UpdateExecutionUseCase extends UseCase<UpdateExecutionCommandInput,
                 .executedPrice(aCommand.executedPrice())
                 .executedVolume(aCommand.executedVolume())
                 .status(aCommand.status())
+                .executionsSold(aCommand.executionsSold())
                 .build();
 
         return UpdateExecutionCommandOutput.from(executionGateway.update(aExecution));

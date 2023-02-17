@@ -6,6 +6,7 @@ import com.investment.managment.stock.StockID;
 import com.investment.managment.wallet.WalletID;
 
 import java.math.BigDecimal;
+import java.util.Set;
 
 public record UpdateExecutionCommandInput(
         ExecutionID id,
@@ -16,7 +17,8 @@ public record UpdateExecutionCommandInput(
         Long executedQuantity,
         BigDecimal executedPrice,
         BigDecimal executedVolume,
-        ExecutionStatus status
+        ExecutionStatus status,
+        Set<ExecutionID> executionsSold
 
 ) {
 
@@ -29,7 +31,8 @@ public record UpdateExecutionCommandInput(
             final Long executedQuantity,
             final BigDecimal executedPrice,
             final BigDecimal executedVolume,
-            final ExecutionStatus status
+            final ExecutionStatus status,
+            final Set<ExecutionID> executionsSold
     ) {
         return new UpdateExecutionCommandInput(id,
                 origin,
@@ -39,6 +42,8 @@ public record UpdateExecutionCommandInput(
                 executedQuantity,
                 executedPrice,
                 executedVolume,
-                status);
+                status,
+                executionsSold
+        );
     }
 }
