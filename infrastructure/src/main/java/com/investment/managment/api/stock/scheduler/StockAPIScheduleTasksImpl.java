@@ -97,7 +97,7 @@ public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
     }
 
     private void updateLastTradePrice(final List<StockUsed> stocksUsed) {
-        final var response = this.hgFeignClient.getStockPrice(stocksUsed.stream().map(StockUsed::getSymbol).collect(Collectors.toList()));
+        final var response = this.hgFeignClient.getStockPrice(stocksUsed.stream().map(StockUsed::getSymbol).toList().toArray(new String[]{}));
         response.buildItems().stream().map(buildStock(stocksUsed)).forEach(stock -> this.updateStockUseCase.execute(
                 UpdateStockCommandInput.with(
                         stock.getId(),

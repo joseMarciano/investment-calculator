@@ -14,5 +14,5 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 @FeignClient(name = "${feign-client.hg-console.name}", url = "${feign-client.hg-console.url}")
 public interface HgFeignClient {
     @RequestMapping(method = GET, value = "/stock_price")
-    GetStockPriceResponse getStockPrice(@RequestParam(value = "symbol") List<String> symbol);
+    GetStockPriceResponse getStockPrice(@RequestParam(value = "symbol") String... symbols);
 }
