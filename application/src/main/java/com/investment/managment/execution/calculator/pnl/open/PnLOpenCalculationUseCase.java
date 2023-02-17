@@ -8,6 +8,7 @@ import com.investment.managment.stock.gateway.StockGateway;
 import com.investment.managment.validation.exception.DomainExeceptionFactory;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 public class PnLOpenCalculationUseCase extends UseCase<PnLOpenCommandInput, PnLOpenCommandOutput> {
 
@@ -31,9 +32,15 @@ public class PnLOpenCalculationUseCase extends UseCase<PnLOpenCommandInput, PnLO
         final var aStock = getStock(execution);
         final var lastTradePrice = aStock.getLastTradePrice();
 
+        final var executionsSold = execution.getExecutionsSold().stream()
+                .map(executionGateway::findById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
+
         return PnLOpenCommandOutput.with(
                 execution.getId(),
-                execution.calculatePnlOpen(lastTradePrice)
+                execution.calculatePnlOpen(lastTradePrice, executionsSold)
         );
     }
 

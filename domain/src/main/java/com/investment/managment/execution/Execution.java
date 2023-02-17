@@ -10,8 +10,12 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
+import static java.math.BigDecimal.ZERO;
+import static java.math.BigDecimal.valueOf;
 import static java.util.Objects.hash;
 import static java.util.Objects.isNull;
 
@@ -58,19 +62,26 @@ public class Execution extends AggregateRoot<ExecutionID> {
         return hash(getId());
     }
 
-    public BigDecimal calculatePnlOpen(final BigDecimal lastTradePrice) {
-        if (ExecutionStatus.SELL.equals(this.getStatus())) return BigDecimal.ZERO;
-        // todo: implementar websocket
-        final var executedQuantity = BigDecimal.valueOf(this.executedQuantity);
-        return executedQuantity.multiply(
-                lastTradePrice.subtract(this.executedPrice)
-        );
+    public BigDecimal calculatePnlOpen(final BigDecimal lastTradePrice, final List<Execution> executionsSold) {
+        if (ExecutionStatus.SELL.equals(this.getStatus())) return ZERO;
+
+        final var soldQuantity = executionsSold.stream()
+                .map(Execution::getExecutedQuantity)
+                .filter(Objects::nonNull)
+                .map(BigDecimal::valueOf)
+                .reduce(BigDecimal::add)
+                .orElse(ZERO);
+
+        final var executedQuantity = valueOf(this.executedQuantity);
+        return executedQuantity
+                .subtract(soldQuantity)
+                .multiply(lastTradePrice.subtract(this.executedPrice));
     }
 
     public BigDecimal calculatePnlClose(final BigDecimal lastTradePrice) {
-        if (ExecutionStatus.BUY.equals(this.getStatus())) return BigDecimal.ZERO;
+        if (ExecutionStatus.BUY.equals(this.getStatus())) return ZERO;
 
-        final var executedQuantity = BigDecimal.valueOf(this.executedQuantity);
+        final var executedQuantity = valueOf(this.executedQuantity);
         return executedQuantity.multiply(
                 this.executedPrice.subtract(lastTradePrice)
         );
