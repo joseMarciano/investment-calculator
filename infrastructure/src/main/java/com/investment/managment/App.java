@@ -1,7 +1,6 @@
 package com.investment.managment;
 
 import com.investment.managment.http.InvestmentManagementFeignClient;
-import com.investment.managment.http.getAllStocks.GetAllStocksResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -11,11 +10,13 @@ import org.springframework.cloud.aws.autoconfigure.context.ContextInstanceDataAu
 import org.springframework.cloud.aws.autoconfigure.context.ContextRegionProviderAutoConfiguration;
 import org.springframework.cloud.aws.autoconfigure.context.ContextStackAutoConfiguration;
 import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableFeignClients
 @EnableScheduling
+@EnableAsync
 @EnableAutoConfiguration(
         exclude = {
                 ContextInstanceDataAutoConfiguration.class,
