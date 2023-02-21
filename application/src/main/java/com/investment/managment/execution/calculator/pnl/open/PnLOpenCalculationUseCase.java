@@ -25,7 +25,7 @@ public class PnLOpenCalculationUseCase extends UseCase<PnLOpenCommandInput, PnLO
     public PnLOpenCommandOutput execute(final PnLOpenCommandInput input) {
         return this.executionGateway.findById(input.id())
                 .map(this::calculate)
-                .orElse(PnLOpenCommandOutput.with(null, BigDecimal.ZERO));
+                .orElse(PnLOpenCommandOutput.with(input.id(), BigDecimal.ZERO));
     }
 
     private PnLOpenCommandOutput calculate(final Execution execution) {
