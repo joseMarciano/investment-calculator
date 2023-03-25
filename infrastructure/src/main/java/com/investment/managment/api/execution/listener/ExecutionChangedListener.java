@@ -15,6 +15,7 @@ import com.investment.managment.execution.update.UpdateExecutionUseCase;
 import com.investment.managment.repository.redis.ExecutionRedisRepository;
 import com.investment.managment.stock.RedisStockGateway;
 import com.investment.managment.stock.StockUsed;
+import org.springframework.cloud.aws.messaging.listener.SqsMessageDeletionPolicy;
 import org.springframework.cloud.aws.messaging.listener.annotation.SqsListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
@@ -50,7 +51,7 @@ public class ExecutionChangedListener {
         this.executionRedisRepository = executionRedisRepository;
     }
 
-    @SqsListener(value = "${aws.sqs.execution-event-changed-queue}")
+    @SqsListener(value = "${aws.sqs.execution-event-changed-queue}", deletionPolicy = SqsMessageDeletionPolicy.ON_SUCCESS)
     public void executionChangedListener(final @Payload ExecutionChangedRequest request) {
         if (ExecutionChangeReason.CREATED.equals(request.reason())) {
             resolveExecutionCreated(request);

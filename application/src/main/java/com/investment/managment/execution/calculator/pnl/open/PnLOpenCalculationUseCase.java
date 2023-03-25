@@ -18,7 +18,6 @@ public class PnLOpenCalculationUseCase extends UseCase<PnLOpenCommandInput, PnLO
     private final StockGateway stockGateway;
     private final ExecutionGateway executionGateway;
     private final ExecutionNotification executionNotification;
-    private static Double lastTradePrice = 4.0;
 
     public PnLOpenCalculationUseCase(final StockGateway stockGateway,
                                      final ExecutionGateway executionGateway,
@@ -51,7 +50,7 @@ public class PnLOpenCalculationUseCase extends UseCase<PnLOpenCommandInput, PnLO
         final var executionUpdated = executionGateway
                 .update(execution);
 
-        final var newPnlOpen = ofNullable(executionUpdated.getPnlOpen()).orElse(ZERO);
+        final var newPnlOpen = ofNullable(execution.getPnlOpen()).orElse(ZERO);
         final var pnlChanged = newPnlOpen.compareTo(oldPnlOpen) != 0;
 
         if (pnlChanged) executionNotification.notifyPnlOpen(executionUpdated);
