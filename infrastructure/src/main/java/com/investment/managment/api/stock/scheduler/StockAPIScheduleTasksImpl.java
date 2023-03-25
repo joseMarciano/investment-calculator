@@ -1,6 +1,8 @@
 package com.investment.managment.api.stock.scheduler;
 
+import com.investment.managment.application.execution.calculator.pnl.PnlOpenCalculationWebSocketAdapter;
 import com.investment.managment.execution.Execution;
+import com.investment.managment.execution.calculator.pnl.open.PnLOpenCommandInput;
 import com.investment.managment.execution.gateway.ExecutionGateway;
 import com.investment.managment.http.HgFeignClient;
 import com.investment.managment.http.InvestmentManagementFeignClient;
@@ -19,7 +21,10 @@ import org.apache.commons.collections4.ListUtils;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -35,18 +40,23 @@ public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
     private final UpdateStockUseCase updateStockUseCase;
     private final CreateStockUseCase createStockUseCase;
 
+    private final PnlOpenCalculationWebSocketAdapter pnlOpenCalculationWebSocketAdapter;
+
+
     public StockAPIScheduleTasksImpl(final InvestmentManagementFeignClient investmentManagementFeignClient,
                                      final HgFeignClient hgFeignClient,
                                      final StockGateway stockGateway,
                                      final ExecutionGateway executionGateway,
                                      final UpdateStockUseCase updateStockUseCase,
-                                     final CreateStockUseCase createStockUseCase) {
+                                     final CreateStockUseCase createStockUseCase,
+                                     final PnlOpenCalculationWebSocketAdapter pnlOpenCalculationWebSocketAdapter) {
         this.investmentManagementFeignClient = investmentManagementFeignClient;
         this.hgFeignClient = hgFeignClient;
         this.stockGateway = stockGateway;
         this.executionGateway = executionGateway;
         this.updateStockUseCase = updateStockUseCase;
         this.createStockUseCase = createStockUseCase;
+        this.pnlOpenCalculationWebSocketAdapter = pnlOpenCalculationWebSocketAdapter;
     }
 
 
@@ -83,17 +93,28 @@ public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
         this.stockGateway.addStockUsed(newStocks);
     }
 
+    /**
+     * Each 25 minutes 9am until 6pm on weekdays
+     */
     @Override
-    @Scheduled(cron = "0 */25 9-18 * * MON-FRI")
+    @Scheduled(fixedDelay = 10000)
+//    @Scheduled(cron = "0 */25 9-18 * * MON-FRI")
     public void updateLastTradePrice() {
         final var usedStocks = new ArrayList<>(this.stockGateway.findUsedStocks());
 
         if (usedStocks.size() > 20) {
-            ListUtils.partition(usedStocks, 20)
-                    .forEach(this::updateLastTradePrice);
+            ListUtils.partition(usedStocks, 20).forEach(this::updateLastTradePrice);
         } else if (!usedStocks.isEmpty()) {
             updateLastTradePrice(usedStocks);
         }
+
+        afterUpdateLastTradePrice();
+    }
+
+    public void afterUpdateLastTradePrice() {
+        executionGateway.findAll().stream().map(Execution::getId).filter(Objects::nonNull)
+                .map(PnLOpenCommandInput::new)
+                .forEach(pnlOpenCalculationWebSocketAdapter::execute);
     }
 
     private void updateLastTradePrice(final List<StockUsed> stocksUsed) {

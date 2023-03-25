@@ -7,6 +7,7 @@ import com.investment.managment.stock.entity.StockUsedRedisEntity;
 import com.investment.managment.stock.gateway.StockGateway;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -40,6 +41,7 @@ public class RedisStockGateway implements StockGateway {
     public Set<StockUsed> findUsedStocks() {
         final var spliterator = this.stockUsedRedisRepository.findAll().spliterator();
         return StreamSupport.stream(spliterator, false)
+                .filter(Objects::nonNull)
                 .map(StockUsedRedisEntity::toAggregate)
                 .collect(Collectors.toSet());
     }

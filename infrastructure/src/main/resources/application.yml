@@ -21,3 +21,5 @@ feign:
       hg-console:
         defaultQueryParameters:
           key: ${HG_CONSOLE_KEY}
+
+user-id: user-id # This simulates a user logged in
