@@ -41,6 +41,8 @@ public class Execution extends AggregateRoot<ExecutionID> {
 
     private ExecutionStatus status;
 
+    private BigDecimal pnlOpen;
+
     @Setter(AccessLevel.NONE)
     private Set<ExecutionID> executionsSold;
 
@@ -62,8 +64,11 @@ public class Execution extends AggregateRoot<ExecutionID> {
         return hash(getId());
     }
 
-    public BigDecimal calculatePnlOpen(final BigDecimal lastTradePrice, final List<Execution> executionsSold) {
-        if (ExecutionStatus.SELL.equals(this.getStatus())) return ZERO;
+    public Execution calculatePnlOpen(final BigDecimal lastTradePrice, final List<Execution> executionsSold) {
+        if (ExecutionStatus.SELL.equals(this.getStatus())) {
+            this.pnlOpen = ZERO;
+            return this;
+        }
 
         final var soldQuantity = executionsSold.stream()
                 .map(Execution::getExecutedQuantity)
@@ -73,9 +78,12 @@ public class Execution extends AggregateRoot<ExecutionID> {
                 .orElse(ZERO);
 
         final var executedQuantity = valueOf(this.executedQuantity);
-        return executedQuantity
+
+        this.pnlOpen = executedQuantity
                 .subtract(soldQuantity)
                 .multiply(lastTradePrice.subtract(this.executedPrice));
+
+        return this;
     }
 
     public BigDecimal calculatePnlClose(final BigDecimal lastTradePrice) {

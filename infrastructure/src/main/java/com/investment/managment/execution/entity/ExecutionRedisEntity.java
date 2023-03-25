@@ -46,6 +46,8 @@ public class ExecutionRedisEntity {
 
     private ExecutionStatus status;
 
+    private BigDecimal pnlOpen;
+
     private Set<String> executionsSold;
 
     public static ExecutionRedisEntity from(final Execution execution) {
@@ -59,6 +61,7 @@ public class ExecutionRedisEntity {
                 .executedPrice(execution.getExecutedPrice())
                 .executedVolume(execution.getExecutedVolume())
                 .status(execution.getStatus())
+                .pnlOpen(execution.getPnlOpen())
                 .executionsSold(getExecutionsSold(execution))
                 .build();
     }
@@ -88,6 +91,7 @@ public class ExecutionRedisEntity {
                 .executedPrice(this.executedPrice)
                 .executedVolume(this.executedVolume)
                 .status(this.status)
+                .pnlOpen(this.pnlOpen)
                 .executionsSold(Objects.nonNull(this.executionsSold) ? this.executionsSold.stream().map(ExecutionID::from).collect(Collectors.toSet()) : new HashSet<>())
                 .build();
     }
