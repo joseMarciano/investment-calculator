@@ -3,7 +3,6 @@ package com.investment.managment.api.execution.listener;
 import com.investment.managment.execution.Execution;
 import com.investment.managment.execution.ExecutionChangeReason;
 import com.investment.managment.execution.ExecutionStatus;
-import com.investment.managment.execution.RedisExecutionGateway;
 import com.investment.managment.execution.create.CreateExecutionCommandInput;
 import com.investment.managment.execution.create.CreateExecutionUseCase;
 import com.investment.managment.execution.deleteById.DeleteExecutionByIdCommandInput;
@@ -34,20 +33,17 @@ public class ExecutionChangedListener {
     private final UpdateExecutionUseCase updateExecutionUseCase;
     private final DeleteExecutionByIdUseCase deleteExecutionByIdUseCase;
     private final RedisStockGateway redisStockGateway;
-    private final RedisExecutionGateway redisExecutionGateway;
     private final ExecutionRedisRepository executionRedisRepository;
 
     public ExecutionChangedListener(final CreateExecutionUseCase createExecutionUseCase,
                                     final UpdateExecutionUseCase updateExecutionUseCase,
                                     final DeleteExecutionByIdUseCase deleteExecutionByIdUseCase,
                                     final RedisStockGateway redisStockGateway,
-                                    final RedisExecutionGateway redisExecutionGateway,
                                     final ExecutionRedisRepository executionRedisRepository) {
         this.createExecutionUseCase = createExecutionUseCase;
         this.updateExecutionUseCase = updateExecutionUseCase;
         this.deleteExecutionByIdUseCase = deleteExecutionByIdUseCase;
         this.redisStockGateway = redisStockGateway;
-        this.redisExecutionGateway = redisExecutionGateway;
         this.executionRedisRepository = executionRedisRepository;
     }
 
@@ -85,7 +81,8 @@ public class ExecutionChangedListener {
                 executionDTO.executedQuantity(),
                 executionDTO.executedPrice(),
                 executionDTO.executedVolume(),
-                executionDTO.status()
+                executionDTO.status(),
+                executionDTO.pnlClose()
         ));
 
         handlerExecutionsSold(executionDTO, execution -> execution.addExecutionSold(executionDTO.id()));
@@ -113,8 +110,8 @@ public class ExecutionChangedListener {
                         executionDTO.executedPrice(),
                         executionDTO.executedVolume(),
                         executionDTO.status(),
-                        execution.getExecutionsSold()
-                )));
+                        execution.getExecutionsSold(),
+                        execution.getPnlClose())));
     }
 
     private void resolveExecutionDeleted(final ExecutionChangedRequest request) {
@@ -127,7 +124,7 @@ public class ExecutionChangedListener {
                 .map(ExecutionRedisEntity::toAggregate)
                 .ifPresent(it -> {
                     this.deleteExecutionByIdUseCase.execute(DeleteExecutionByIdCommandInput.with(executionDTO.id()));
-                    handlerExecutionsSold(ExecutionDTO.with(it.getId(), it.getOrigin(), it.getStatus()), execution -> execution.removeExecutionSold(executionDTO.id()));
+                    handlerExecutionsSold(ExecutionDTO.with(it.getId(), it.getOrigin(), it.getStatus(), it.getPnlClose()), execution -> execution.removeExecutionSold(executionDTO.id()));
                 });
     }
 
@@ -154,7 +151,8 @@ public class ExecutionChangedListener {
                 execution.getExecutedPrice(),
                 execution.getExecutedVolume(),
                 execution.getStatus(),
-                execution.getExecutionsSold()
+                execution.getExecutionsSold(),
+                execution.getPnlClose()
         ));
     }
 }

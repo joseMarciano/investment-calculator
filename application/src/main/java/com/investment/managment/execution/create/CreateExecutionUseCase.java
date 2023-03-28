@@ -29,6 +29,7 @@ public class CreateExecutionUseCase extends UseCase<CreateExecutionCommandInput,
                 .executedVolume(aCommand.executedVolume())
                 .status(aCommand.status())
                 .executionsSold(Set.of())
+                .pnlClose(aCommand.pnlClose())
                 .build();
 
         return CreateExecutionCommandOutput.from(executionGateway.create(aExecution));

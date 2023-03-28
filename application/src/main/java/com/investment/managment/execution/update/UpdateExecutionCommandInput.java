@@ -18,9 +18,9 @@ public record UpdateExecutionCommandInput(
         BigDecimal executedPrice,
         BigDecimal executedVolume,
         ExecutionStatus status,
-        Set<ExecutionID> executionsSold
+        Set<ExecutionID> executionsSold,
 
-) {
+        BigDecimal pnlClose) {
 
     public static UpdateExecutionCommandInput with(
             final ExecutionID id,
@@ -32,8 +32,8 @@ public record UpdateExecutionCommandInput(
             final BigDecimal executedPrice,
             final BigDecimal executedVolume,
             final ExecutionStatus status,
-            final Set<ExecutionID> executionsSold
-    ) {
+            final Set<ExecutionID> executionsSold,
+            final BigDecimal pnlClose) {
         return new UpdateExecutionCommandInput(id,
                 origin,
                 stockId,
@@ -43,7 +43,8 @@ public record UpdateExecutionCommandInput(
                 executedPrice,
                 executedVolume,
                 status,
-                executionsSold
+                executionsSold,
+                pnlClose
         );
     }
 }

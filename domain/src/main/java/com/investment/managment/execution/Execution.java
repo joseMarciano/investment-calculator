@@ -43,6 +43,8 @@ public class Execution extends AggregateRoot<ExecutionID> {
 
     private BigDecimal pnlOpen;
 
+    private BigDecimal pnlClose;
+
     @Setter(AccessLevel.NONE)
     private Set<ExecutionID> executionsSold;
 
