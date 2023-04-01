@@ -1,9 +1,11 @@
 package com.investment.managment.api.stock.scheduler;
 
 import com.investment.managment.application.execution.calculator.pnl.PnlOpenCalculationWebSocketAdapter;
+import com.investment.managment.application.execution.calculator.pnl.PnlOpenTotalizatorCalculationWebSocketAdapter;
 import com.investment.managment.execution.Execution;
 import com.investment.managment.execution.calculator.pnl.open.PnLOpenCommandInput;
 import com.investment.managment.execution.gateway.ExecutionGateway;
+import com.investment.managment.execution.sumary.ExecutionSummaryID;
 import com.investment.managment.http.HgFeignClient;
 import com.investment.managment.http.InvestmentManagementFeignClient;
 import com.investment.managment.http.getAllStocks.GetAllStocksResponse;
@@ -17,10 +19,12 @@ import com.investment.managment.stock.create.CreateStockUseCase;
 import com.investment.managment.stock.gateway.StockGateway;
 import com.investment.managment.stock.update.UpdateStockCommandInput;
 import com.investment.managment.stock.update.UpdateStockUseCase;
+import com.investment.managment.utils.AsyncRunnableMethod;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -39,8 +43,10 @@ public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
     private final ExecutionGateway executionGateway;
     private final UpdateStockUseCase updateStockUseCase;
     private final CreateStockUseCase createStockUseCase;
-
     private final PnlOpenCalculationWebSocketAdapter pnlOpenCalculationWebSocketAdapter;
+    private final PnlOpenTotalizatorCalculationWebSocketAdapter pnlOpenTotalizatorCalculationWebSocketAdapter;
+
+    private final AsyncRunnableMethod asyncRunnableMethod;
 
 
     public StockAPIScheduleTasksImpl(final InvestmentManagementFeignClient investmentManagementFeignClient,
@@ -49,7 +55,9 @@ public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
                                      final ExecutionGateway executionGateway,
                                      final UpdateStockUseCase updateStockUseCase,
                                      final CreateStockUseCase createStockUseCase,
-                                     final PnlOpenCalculationWebSocketAdapter pnlOpenCalculationWebSocketAdapter) {
+                                     final PnlOpenCalculationWebSocketAdapter pnlOpenCalculationWebSocketAdapter,
+                                     final PnlOpenTotalizatorCalculationWebSocketAdapter pnlOpenTotalizatorCalculationWebSocketAdapter,
+                                     final AsyncRunnableMethod asyncRunnableMethod) {
         this.investmentManagementFeignClient = investmentManagementFeignClient;
         this.hgFeignClient = hgFeignClient;
         this.stockGateway = stockGateway;
@@ -57,6 +65,8 @@ public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
         this.updateStockUseCase = updateStockUseCase;
         this.createStockUseCase = createStockUseCase;
         this.pnlOpenCalculationWebSocketAdapter = pnlOpenCalculationWebSocketAdapter;
+        this.pnlOpenTotalizatorCalculationWebSocketAdapter = pnlOpenTotalizatorCalculationWebSocketAdapter;
+        this.asyncRunnableMethod = asyncRunnableMethod;
     }
 
 
@@ -111,18 +121,33 @@ public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
     }
 
     public void afterUpdateLastTradePrice() {
-        executionGateway.findAll().stream().map(Execution::getId).filter(Objects::nonNull)
-                .map(PnLOpenCommandInput::new)
-                .forEach(pnlOpenCalculationWebSocketAdapter::execute);
+        final Runnable calculatePnlOpen = () -> executionGateway.findAll().stream()
+                .filter(Objects::nonNull)
+                .forEach(it -> {
+                    pnlOpenCalculationWebSocketAdapter.execute(PnLOpenCommandInput.with(it.getId()));
+                    this.executionGateway.getOrCreateExecutionSummary(ExecutionSummaryID.from(it.getStockId(), it.getWalletId())); // Create summary if not exists
+                });
+
+        final Runnable calculatePnlOpenTotal = pnlOpenTotalizatorCalculationWebSocketAdapter::execute;
+
+        System.out.println(Thread.currentThread().getName());
+        this.asyncRunnableMethod.runAsync(
+                calculatePnlOpen,
+                calculatePnlOpenTotal
+        );
     }
+
+    private static long price = 1;
 
     private void updateLastTradePrice(final List<StockUsed> stocksUsed) {
         final var response = this.hgFeignClient.getStockPrice(stocksUsed.stream().map(StockUsed::getSymbol).toList().toArray(new String[]{}));
+        price += 10;
+        price = price > 100 ? 0 : price;
         response.buildItems().stream().map(buildStock(stocksUsed)).forEach(stock -> this.updateStockUseCase.execute(
                 UpdateStockCommandInput.with(
                         stock.getId(),
                         stock.getSymbol(),
-                        stock.getLastTradePrice()
+                        BigDecimal.valueOf(price)
                 )
         ));
     }

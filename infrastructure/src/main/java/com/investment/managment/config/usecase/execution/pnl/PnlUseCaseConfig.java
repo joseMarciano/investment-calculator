@@ -1,6 +1,7 @@
 package com.investment.managment.config.usecase.execution.pnl;
 
 import com.investment.managment.execution.calculator.pnl.open.PnLOpenCalculationUseCase;
+import com.investment.managment.execution.calculator.pnl.open.totalizator.PnLOpenTotalizatorCalculationUseCase;
 import com.investment.managment.execution.gateway.ExecutionGateway;
 import com.investment.managment.execution.gateway.ExecutionNotification;
 import com.investment.managment.stock.gateway.StockGateway;
@@ -26,5 +27,10 @@ public class PnlUseCaseConfig {
     @Bean
     public PnLOpenCalculationUseCase pnLOpenCalculationUseCase() {
         return new PnLOpenCalculationUseCase(this.stockGateway, this.executionGateway, this.executionNotification);
+    }
+
+    @Bean
+    public PnLOpenTotalizatorCalculationUseCase pnLOpenTotalizatorCalculationUseCase() {
+        return new PnLOpenTotalizatorCalculationUseCase(this.executionGateway);
     }
 }

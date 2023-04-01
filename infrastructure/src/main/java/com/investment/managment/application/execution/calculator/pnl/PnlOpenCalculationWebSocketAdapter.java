@@ -1,14 +1,12 @@
 package com.investment.managment.application.execution.calculator.pnl;
 
 import com.investment.managment.UseCase;
-import com.investment.managment.execution.ExecutionID;
 import com.investment.managment.execution.calculator.pnl.open.PnLOpenCalculationUseCase;
 import com.investment.managment.execution.calculator.pnl.open.PnLOpenCommandInput;
 import com.investment.managment.execution.calculator.pnl.open.PnLOpenCommandOutput;
 import com.investment.managment.execution.presenter.ExecutionApiPresenter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -26,7 +24,6 @@ public class PnlOpenCalculationWebSocketAdapter extends UseCase<PnLOpenCommandIn
         this.userId = userId;
     }
 
-    @Async
     @Override
     public PnLOpenCommandOutput execute(final PnLOpenCommandInput input) {
         final PnLOpenCommandOutput output = this.pnLOpenCalculationUseCase.execute(input);
