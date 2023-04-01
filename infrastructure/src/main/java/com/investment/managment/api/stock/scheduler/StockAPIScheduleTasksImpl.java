@@ -17,10 +17,13 @@ import com.investment.managment.stock.StockUsed;
 import com.investment.managment.stock.create.CreateStockCommandInput;
 import com.investment.managment.stock.create.CreateStockUseCase;
 import com.investment.managment.stock.gateway.StockGateway;
+import com.investment.managment.stock.model.LastTradePriceRequest;
 import com.investment.managment.stock.update.UpdateStockCommandInput;
 import com.investment.managment.stock.update.UpdateStockUseCase;
 import com.investment.managment.utils.AsyncRunnableMethod;
 import org.apache.commons.collections4.ListUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -45,9 +48,9 @@ public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
     private final CreateStockUseCase createStockUseCase;
     private final PnlOpenCalculationWebSocketAdapter pnlOpenCalculationWebSocketAdapter;
     private final PnlOpenTotalizatorCalculationWebSocketAdapter pnlOpenTotalizatorCalculationWebSocketAdapter;
-
     private final AsyncRunnableMethod asyncRunnableMethod;
-
+    private final SimpMessagingTemplate messagingTemplate;
+    private final String userId;
 
     public StockAPIScheduleTasksImpl(final InvestmentManagementFeignClient investmentManagementFeignClient,
                                      final HgFeignClient hgFeignClient,
@@ -57,7 +60,9 @@ public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
                                      final CreateStockUseCase createStockUseCase,
                                      final PnlOpenCalculationWebSocketAdapter pnlOpenCalculationWebSocketAdapter,
                                      final PnlOpenTotalizatorCalculationWebSocketAdapter pnlOpenTotalizatorCalculationWebSocketAdapter,
-                                     final AsyncRunnableMethod asyncRunnableMethod) {
+                                     final AsyncRunnableMethod asyncRunnableMethod,
+                                     final SimpMessagingTemplate messagingTemplate,
+                                     final @Value("${user-id}") String userId) {
         this.investmentManagementFeignClient = investmentManagementFeignClient;
         this.hgFeignClient = hgFeignClient;
         this.stockGateway = stockGateway;
@@ -67,6 +72,8 @@ public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
         this.pnlOpenCalculationWebSocketAdapter = pnlOpenCalculationWebSocketAdapter;
         this.pnlOpenTotalizatorCalculationWebSocketAdapter = pnlOpenTotalizatorCalculationWebSocketAdapter;
         this.asyncRunnableMethod = asyncRunnableMethod;
+        this.messagingTemplate = messagingTemplate;
+        this.userId = userId;
     }
 
 
@@ -107,7 +114,8 @@ public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
      * Each 25 minutes 9am until 6pm on weekdays
      */
     @Override
-    @Scheduled(cron = "0 */25 9-18 * * MON-FRI")
+//    @Scheduled(cron = "0 */25 9-18 * * MON-FRI")
+    @Scheduled(fixedDelay = 5000)
     public void updateLastTradePrice() {
         final var usedStocks = new ArrayList<>(this.stockGateway.findUsedStocks());
 
@@ -117,7 +125,7 @@ public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
             updateLastTradePrice(usedStocks);
         }
 
-        afterUpdateLastTradePrice();
+//        afterUpdateLastTradePrice();
     }
 
     public void afterUpdateLastTradePrice() {
@@ -130,26 +138,33 @@ public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
 
         final Runnable calculatePnlOpenTotal = pnlOpenTotalizatorCalculationWebSocketAdapter::execute;
 
-        System.out.println(Thread.currentThread().getName());
         this.asyncRunnableMethod.runAsync(
                 calculatePnlOpen,
                 calculatePnlOpenTotal
         );
     }
 
-    private static long price = 1;
+    private static long price = 1; // TODO: PUT LAST TRADE PRICE
 
     private void updateLastTradePrice(final List<StockUsed> stocksUsed) {
         final var response = this.hgFeignClient.getStockPrice(stocksUsed.stream().map(StockUsed::getSymbol).toList().toArray(new String[]{}));
-        price += 10;
+        price += 10.13;
         price = price > 100 ? 0 : price;
-        response.buildItems().stream().map(buildStock(stocksUsed)).forEach(stock -> this.updateStockUseCase.execute(
-                UpdateStockCommandInput.with(
-                        stock.getId(),
-                        stock.getSymbol(),
-                        BigDecimal.valueOf(price)
-                )
-        ));
+        final Consumer<Stock> stockConsumer = stock -> {
+            this.updateStockUseCase.execute(
+                    UpdateStockCommandInput.with(
+                            stock.getId(),
+                            stock.getSymbol(),
+                            BigDecimal.valueOf(price)
+                    )
+            );
+
+            this.messagingTemplate
+                    .convertAndSendToUser(userId, stock.getSymbol() + "/last-trade-price",
+                            LastTradePriceRequest.with(stock.getId(), stock.getSymbol(), BigDecimal.valueOf(price)));
+        };
+        response.buildItems().stream().map(buildStock(stocksUsed))
+                .forEach(stockConsumer);
     }
 
     private Function<StockLastTradePrice, Stock> buildStock(final List<StockUsed> stocksUsed) {
