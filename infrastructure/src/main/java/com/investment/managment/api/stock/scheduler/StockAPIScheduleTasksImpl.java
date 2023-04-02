@@ -125,7 +125,7 @@ public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
             updateLastTradePrice(usedStocks);
         }
 
-//        afterUpdateLastTradePrice();
+        afterUpdateLastTradePrice();
     }
 
     public void afterUpdateLastTradePrice() {

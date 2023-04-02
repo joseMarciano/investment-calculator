@@ -27,7 +27,7 @@ public class PnlOpenCalculationWebSocketAdapter extends UseCase<PnLOpenCommandIn
     @Override
     public PnLOpenCommandOutput execute(final PnLOpenCommandInput input) {
         final PnLOpenCommandOutput output = this.pnLOpenCalculationUseCase.execute(input);
-        simpMessagingTemplate.convertAndSendToUser(this.userId, "pnl-open", ExecutionApiPresenter.present.apply(output));
+        simpMessagingTemplate.convertAndSendToUser(this.userId, output.id().getValue() + "/pnl-open", ExecutionApiPresenter.present.apply(output));
         return output;
     }
 }
