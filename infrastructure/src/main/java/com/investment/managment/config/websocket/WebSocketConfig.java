@@ -20,7 +20,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(final StompEndpointRegistry registry) {
         registry.addEndpoint("/websocket")
-                .setAllowedOriginPatterns("*") //TODO: PUT FRONT END URL ORIGIN
+                .setAllowedOriginPatterns("*")
                 .withSockJS();
     }
 
