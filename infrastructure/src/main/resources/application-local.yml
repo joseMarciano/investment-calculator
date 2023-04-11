@@ -1,3 +1,6 @@
+server:
+  port: 8081
+
 aws:
   sqs:
     execution-event-changed-queue: https://sqs.us-east-1.amazonaws.com/446633124077/execution-event-changed
@@ -13,5 +16,5 @@ feign-client:
     url: http://localhost:8080/api/
     name: investment-management
   hg-console:
-      url: https://api.hgbrasil.com/finance/
-      name: hg-console
+    url: https://api.hgbrasil.com/finance/
+    name: hg-console
