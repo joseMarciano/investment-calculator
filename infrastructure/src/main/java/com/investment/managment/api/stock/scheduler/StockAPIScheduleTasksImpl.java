@@ -21,12 +21,14 @@ import com.investment.managment.stock.model.LastTradePriceRequest;
 import com.investment.managment.stock.update.UpdateStockCommandInput;
 import com.investment.managment.stock.update.UpdateStockUseCase;
 import com.investment.managment.utils.AsyncRunnableMethod;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -36,6 +38,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
+@Slf4j
 public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
 
     private static final int LIMIT = 5000;
@@ -73,6 +76,15 @@ public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
         this.asyncRunnableMethod = asyncRunnableMethod;
         this.messagingTemplate = messagingTemplate;
         this.userId = userId;
+    }
+
+    @PostConstruct
+    public void init() {
+        try {
+            updateOrCreateStocks();
+        } catch (Exception e) {
+            log.error("Error on init StockAPIScheduleTasksImpl {}", e.getMessage());
+        }
     }
 
 
