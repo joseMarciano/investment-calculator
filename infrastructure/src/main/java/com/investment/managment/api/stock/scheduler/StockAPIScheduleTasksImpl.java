@@ -27,7 +27,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -114,8 +113,7 @@ public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
      * Each 25 minutes 9am until 6pm on weekdays
      */
     @Override
-//    @Scheduled(cron = "0 */25 9-18 * * MON-FRI")
-    @Scheduled(fixedDelay = 5000)
+    @Scheduled(cron = "0 */25 9-18 * * MON-FRI")
     public void updateLastTradePrice() {
         final var usedStocks = new ArrayList<>(this.stockGateway.findUsedStocks());
 
@@ -144,24 +142,22 @@ public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
         );
     }
 
-    private static long price = 1; // TODO: PUT LAST TRADE PRICE
 
     private void updateLastTradePrice(final List<StockUsed> stocksUsed) {
         final var response = this.hgFeignClient.getStockPrice(stocksUsed.stream().map(StockUsed::getSymbol).toList().toArray(new String[]{}));
-        price += 10.13;
-        price = price > 100 ? 0 : price;
+
         final Consumer<Stock> stockConsumer = stock -> {
             this.updateStockUseCase.execute(
                     UpdateStockCommandInput.with(
                             stock.getId(),
                             stock.getSymbol(),
-                            BigDecimal.valueOf(price)
+                            stock.getLastTradePrice()
                     )
             );
 
             this.messagingTemplate
                     .convertAndSendToUser(userId, stock.getSymbol() + "/last-trade-price",
-                            LastTradePriceRequest.with(stock.getId(), stock.getSymbol(), BigDecimal.valueOf(price)));
+                            LastTradePriceRequest.with(stock.getId(), stock.getSymbol(), stock.getLastTradePrice()));
         };
         response.buildItems().stream().map(buildStock(stocksUsed))
                 .forEach(stockConsumer);
