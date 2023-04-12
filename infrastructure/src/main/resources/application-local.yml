@@ -7,9 +7,7 @@ aws:
     execution-pnl-open-changed-queue: https://sqs.us-east-1.amazonaws.com/446633124077/execution-pnl-open-event-changed
 
 redis:
-  host: localhost
-  port: 6379
-
+  host: redis://localhost:6379
 
 feign-client:
   investment-management:
