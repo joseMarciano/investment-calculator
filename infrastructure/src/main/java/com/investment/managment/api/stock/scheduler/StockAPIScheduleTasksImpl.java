@@ -29,6 +29,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -125,7 +126,8 @@ public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
      * Each 25 minutes 9am until 6pm on weekdays
      */
     @Override
-    @Scheduled(cron = "0 */25 9-18 * * MON-FRI")
+//    @Scheduled(cron = "0 */25 9-18 * * MON-FRI")
+    @Scheduled(fixedDelay = 20000)
     public void updateLastTradePrice() {
         final var usedStocks = new ArrayList<>(this.stockGateway.findUsedStocks());
 
@@ -137,6 +139,7 @@ public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
 
         afterUpdateLastTradePrice();
     }
+
 
     public void afterUpdateLastTradePrice() {
         final Runnable calculatePnlOpen = () -> executionGateway.findAll().stream()
@@ -154,22 +157,28 @@ public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
         );
     }
 
+    private static Double lastPrice = 1.0;
 
     private void updateLastTradePrice(final List<StockUsed> stocksUsed) {
         final var response = this.hgFeignClient.getStockPrice(stocksUsed.stream().map(StockUsed::getSymbol).toList().toArray(new String[]{}));
+
+        lastPrice += 5.23;
+        if (lastPrice > 100) {
+            lastPrice = 1.0;
+        }
 
         final Consumer<Stock> stockConsumer = stock -> {
             this.updateStockUseCase.execute(
                     UpdateStockCommandInput.with(
                             stock.getId(),
                             stock.getSymbol(),
-                            stock.getLastTradePrice()
+                            BigDecimal.valueOf(lastPrice)
                     )
             );
 
             this.messagingTemplate
                     .convertAndSendToUser(userId, stock.getSymbol() + "/last-trade-price",
-                            LastTradePriceRequest.with(stock.getId(), stock.getSymbol(), stock.getLastTradePrice()));
+                            LastTradePriceRequest.with(stock.getId(), stock.getSymbol(), BigDecimal.valueOf(lastPrice)));
         };
         response.buildItems().stream().map(buildStock(stocksUsed))
                 .forEach(stockConsumer);
