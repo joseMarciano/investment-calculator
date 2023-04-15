@@ -92,7 +92,7 @@ public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
      * Every week day at 1:30am
      */
     @Override
-    @Scheduled(cron = "0 30 1 * * MON-FRI")
+    @Scheduled(cron = "0 30 1 * * MON-FRI", zone = "America/Sao_Paulo")
     public void updateOrCreateStocks() {
         Optional.ofNullable(this.investmentManagementFeignClient.getAllTickers(LIMIT))
                 .map(GetAllStocksResponse::items)
@@ -103,7 +103,7 @@ public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
      * Every week day at 1:45am
      */
     @Override
-    @Scheduled(cron = "0 45 1 * * MON-FRI")
+    @Scheduled(cron = "0 45 1 * * MON-FRI", zone = "America/Sao_Paulo")
     public void verifyUpdateUsedStocks() {
         final var stocksUsed = this.executionGateway.findAll()
                 .stream().map(Execution::getStockId)
@@ -125,7 +125,7 @@ public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
      * Each 25 minutes 9am until 6pm on weekdays
      */
     @Override
-    @Scheduled(cron = "0 */25 9-18 * * MON-FRI")
+    @Scheduled(cron = "0 */25 9-18 * * MON-FRI", zone = "America/Sao_Paulo")
     public void updateLastTradePrice() {
         final var usedStocks = new ArrayList<>(this.stockGateway.findUsedStocks());
 
