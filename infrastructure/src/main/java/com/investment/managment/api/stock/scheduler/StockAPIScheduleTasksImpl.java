@@ -125,7 +125,8 @@ public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
      * Each 25 minutes 9am until 6pm on weekdays
      */
     @Override
-    @Scheduled(cron = "0 */25 9-18 * * MON-FRI", zone = "America/Sao_Paulo")
+//    @Scheduled(cron = "0 */25 9-18 * * MON-FRI", zone = "America/Sao_Paulo")
+    @Scheduled(cron = "0 */1 9-23 * * MON-FRI", zone = "America/Sao_Paulo")
     public void updateLastTradePrice() {
         final var usedStocks = new ArrayList<>(this.stockGateway.findUsedStocks());
 
@@ -136,6 +137,7 @@ public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
         }
 
         afterUpdateLastTradePrice();
+        log.info("Prices updated!!");
     }
 
     public void afterUpdateLastTradePrice() {
