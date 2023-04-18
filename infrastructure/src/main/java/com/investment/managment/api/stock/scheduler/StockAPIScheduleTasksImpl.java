@@ -42,6 +42,7 @@ import java.util.stream.Collectors;
 public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
 
     private static final int LIMIT = 5000;
+    public static final int MAX_STOCK_SIZE_BY_REQUEST = 3;
     private final InvestmentManagementFeignClient investmentManagementFeignClient;
     private final HgFeignClient hgFeignClient;
     private final StockGateway stockGateway;
@@ -130,8 +131,8 @@ public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
     public void updateLastTradePrice() {
         final var usedStocks = new ArrayList<>(this.stockGateway.findUsedStocks());
 
-        if (usedStocks.size() > 3) {
-            ListUtils.partition(usedStocks, 20).forEach(this::updateLastTradePrice);
+        if (usedStocks.size() > MAX_STOCK_SIZE_BY_REQUEST) {
+            ListUtils.partition(usedStocks, MAX_STOCK_SIZE_BY_REQUEST).forEach(this::updateLastTradePrice);
         } else if (!usedStocks.isEmpty()) {
             updateLastTradePrice(usedStocks);
         }
