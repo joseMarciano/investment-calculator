@@ -130,7 +130,7 @@ public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
     public void updateLastTradePrice() {
         final var usedStocks = new ArrayList<>(this.stockGateway.findUsedStocks());
 
-        if (usedStocks.size() > 20) {
+        if (usedStocks.size() > 3) {
             ListUtils.partition(usedStocks, 20).forEach(this::updateLastTradePrice);
         } else if (!usedStocks.isEmpty()) {
             updateLastTradePrice(usedStocks);
