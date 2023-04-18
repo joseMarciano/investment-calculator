@@ -15,6 +15,7 @@ public record GetStockPriceResponse(Object results) {
                     .values()
                     .stream()
                     .map(this::buildStockPriceResponse)
+                    .filter(Objects::nonNull)
                     .collect(Collectors.toList());
         } catch (Exception e) {
             log.error("Error on getItems {}", e.getMessage());
