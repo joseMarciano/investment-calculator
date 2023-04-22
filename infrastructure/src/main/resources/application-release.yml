@@ -12,7 +12,7 @@ redis:
 
 feign-client:
   investment-management:
-    url: https://investment-managment.herokuapp.com/api/
+    url: ${INVESTMENT_MANAGEMENT_URL}
     name: investment-management
   hg-console:
     url: https://api.hgbrasil.com/finance/

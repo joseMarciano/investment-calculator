@@ -11,4 +11,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 public interface InvestmentManagementFeignClient {
     @RequestMapping(method = GET, value = "/stocks")
     GetAllStocksResponse getAllTickers(@RequestParam(value = "limit") int limit);
+
+    @RequestMapping(method = GET, value = "/health")
+    void check();
 }
