@@ -11,7 +11,6 @@ import com.investment.managment.validation.exception.DomainExeceptionFactory;
 import java.util.Optional;
 
 import static java.math.BigDecimal.ZERO;
-import static java.util.Optional.ofNullable;
 
 public class PnLOpenCalculationUseCase extends UseCase<PnLOpenCommandInput, PnLOpenCommandOutput> {
 
@@ -37,7 +36,6 @@ public class PnLOpenCalculationUseCase extends UseCase<PnLOpenCommandInput, PnLO
     private PnLOpenCommandOutput calculate(final Execution execution) {
         final var aStock = getStock(execution);
         final var lastTradePrice = aStock.getLastTradePrice();
-        final var oldPnlOpen = ofNullable(execution.getPnlOpen()).orElse(ZERO);
 
         final var executionsSold = execution.getExecutionsSold().stream()
                 .map(executionGateway::findById)
@@ -50,10 +48,7 @@ public class PnLOpenCalculationUseCase extends UseCase<PnLOpenCommandInput, PnLO
         final var executionUpdated = executionGateway
                 .update(execution);
 
-        final var newPnlOpen = ofNullable(execution.getPnlOpen()).orElse(ZERO);
-        final var pnlChanged = newPnlOpen.compareTo(oldPnlOpen) != 0;
-
-        if (pnlChanged) executionNotification.notifyPnlOpen(executionUpdated);
+        executionNotification.notifyPnlOpen(executionUpdated);
 
         return PnLOpenCommandOutput.with(
                 execution.getId(),
