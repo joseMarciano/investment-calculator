@@ -9,8 +9,6 @@ import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-import static java.math.BigDecimal.ZERO;
-
 public class PnLOpenTotalizatorCalculationUseCase extends UseCase<PnLOpenTotalizatorCommandInput, PnLOpenTotalizatorCommandOutput> {
 
     private final ExecutionGateway executionGateway;
@@ -27,7 +25,7 @@ public class PnLOpenTotalizatorCalculationUseCase extends UseCase<PnLOpenTotaliz
                 .map(Execution::getPnlOpen)
                 .filter(Objects::nonNull)
                 .reduce(BigDecimal::add)
-                .orElse(ZERO);
+                .orElse(BigDecimal.ZERO);
 
         final var executionSummary = this.executionGateway.getOrCreateExecutionSummary(input.id());
 
