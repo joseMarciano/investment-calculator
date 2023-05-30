@@ -22,7 +22,6 @@ public class UserSocketRequest {
     public void request(@Payload String payload) {
         final var request = Json.convertToObj(payload, UserOnlineRequest.class);
         this.userOnlineUseCase.execute(UserOnlineCommandInput.with(request.id(), request.online()));
-        System.out.println(Thread.currentThread().getName());
     }
 
 }
