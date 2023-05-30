@@ -10,6 +10,7 @@ import com.investment.managment.http.HgFeignClient;
 import com.investment.managment.http.InvestmentManagementFeignClient;
 import com.investment.managment.http.getAllStocks.GetAllStocksResponse;
 import com.investment.managment.http.getAllStocks.StockItemResponse;
+import com.investment.managment.http.getstockprice.GetStockPriceResponse;
 import com.investment.managment.http.getstockprice.StockLastTradePrice;
 import com.investment.managment.stock.Stock;
 import com.investment.managment.stock.StockID;
@@ -138,7 +139,6 @@ public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
         }
 
         afterUpdateLastTradePrice();
-        log.info("Prices updated!!");
     }
 
     public void afterUpdateLastTradePrice() {
@@ -159,7 +159,11 @@ public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
 
 
     private void updateLastTradePrice(final List<StockUsed> stocksUsed) {
-        final var response = this.hgFeignClient.getStockPrice(stocksUsed.stream().map(StockUsed::getSymbol).toList().toArray(new String[]{}));
+        final var response = getStockPrice(stocksUsed);
+
+        if (response.isEmpty()) {
+            return;
+        }
 
         final Consumer<Stock> stockConsumer = stock -> {
             this.updateStockUseCase.execute(
@@ -174,8 +178,18 @@ public class StockAPIScheduleTasksImpl implements StockAPIScheduleTasks {
                     .convertAndSendToUser(userId, stock.getSymbol() + "/last-trade-price",
                             LastTradePriceRequest.with(stock.getId(), stock.getSymbol(), stock.getLastTradePrice()));
         };
-        response.buildItems().stream().map(buildStock(stocksUsed))
+
+        response.get().buildItems().stream().map(buildStock(stocksUsed))
                 .forEach(stockConsumer);
+    }
+
+    private Optional<GetStockPriceResponse> getStockPrice(final List<StockUsed> stocksUsed) {
+        try {
+            return Optional.of(this.hgFeignClient.getStockPrice(stocksUsed.stream().map(StockUsed::getSymbol).toList().toArray(new String[]{})));
+        } catch (Exception e) {
+            log.error("Error on getStockPrice {}", e.getMessage());
+            return Optional.empty();
+        }
     }
 
     private Function<StockLastTradePrice, Stock> buildStock(final List<StockUsed> stocksUsed) {

@@ -28,6 +28,7 @@ public class UpdateExecutionUseCase extends UseCase<UpdateExecutionCommandInput,
                 .status(aCommand.status())
                 .executionsSold(aCommand.executionsSold())
                 .pnlClose(aCommand.pnlClose())
+                .pnlClosePercentage(aCommand.pnlClosePercentage())
                 .build();
 
         return UpdateExecutionCommandOutput.from(executionGateway.update(aExecution));

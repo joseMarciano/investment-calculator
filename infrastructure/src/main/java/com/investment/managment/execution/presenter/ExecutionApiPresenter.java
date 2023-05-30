@@ -19,6 +19,6 @@ public interface ExecutionApiPresenter {
     }
 
     Function<PnLOpenCommandOutput, PnlOpenWebSocketResponse> present =
-            pnLOpenCommandOutput -> new PnlOpenWebSocketResponse(pnLOpenCommandOutput.id().getValue(), pnLOpenCommandOutput.pnl());
+            pnLOpenCommandOutput -> new PnlOpenWebSocketResponse(pnLOpenCommandOutput.id().getValue(), pnLOpenCommandOutput.pnl(), pnLOpenCommandOutput.pnlOpenPercentage());
 
 }

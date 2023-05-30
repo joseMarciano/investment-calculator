@@ -30,6 +30,7 @@ public class CreateExecutionUseCase extends UseCase<CreateExecutionCommandInput,
                 .status(aCommand.status())
                 .executionsSold(Set.of())
                 .pnlClose(aCommand.pnlClose())
+                .pnlClosePercentage(aCommand.pnlClosePercentage())
                 .build();
 
         return CreateExecutionCommandOutput.from(executionGateway.create(aExecution));

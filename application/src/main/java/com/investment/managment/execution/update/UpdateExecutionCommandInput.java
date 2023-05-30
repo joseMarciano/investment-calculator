@@ -19,8 +19,8 @@ public record UpdateExecutionCommandInput(
         BigDecimal executedVolume,
         ExecutionStatus status,
         Set<ExecutionID> executionsSold,
-
-        BigDecimal pnlClose) {
+        BigDecimal pnlClose,
+        BigDecimal pnlClosePercentage) {
 
     public static UpdateExecutionCommandInput with(
             final ExecutionID id,
@@ -33,7 +33,8 @@ public record UpdateExecutionCommandInput(
             final BigDecimal executedVolume,
             final ExecutionStatus status,
             final Set<ExecutionID> executionsSold,
-            final BigDecimal pnlClose) {
+            final BigDecimal pnlClose,
+            final BigDecimal pnlClosePercentage) {
         return new UpdateExecutionCommandInput(id,
                 origin,
                 stockId,
@@ -44,7 +45,8 @@ public record UpdateExecutionCommandInput(
                 executedVolume,
                 status,
                 executionsSold,
-                pnlClose
+                pnlClose,
+                pnlClosePercentage
         );
     }
 }

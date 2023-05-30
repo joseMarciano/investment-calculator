@@ -23,12 +23,13 @@ public record ExecutionChangedRequest(
             BigDecimal executedPrice,
             BigDecimal executedVolume,
             ExecutionStatus status,
-            BigDecimal pnlClose
+            BigDecimal pnlClose,
+            BigDecimal pnlClosePercentage
 
     ) {
 
-        public static ExecutionDTO with(final ExecutionID anId, final ExecutionID originId, final ExecutionStatus status, final BigDecimal pnlClose) {
-            return new ExecutionDTO(anId, originId, null, null, null, null, null, null, status, pnlClose);
+        public static ExecutionDTO with(final ExecutionID anId, final ExecutionID originId, final ExecutionStatus status) {
+            return new ExecutionDTO(anId, originId, null, null, null, null, null, null, status, null, null);
         }
 
     }

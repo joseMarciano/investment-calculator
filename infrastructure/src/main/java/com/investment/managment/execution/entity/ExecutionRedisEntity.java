@@ -47,6 +47,9 @@ public class ExecutionRedisEntity {
     private ExecutionStatus status;
 
     private BigDecimal pnlOpen;
+
+    private BigDecimal pnlOpenPercentage;
+
     private BigDecimal pnlClose;
 
     private Set<String> executionsSold;
@@ -63,6 +66,7 @@ public class ExecutionRedisEntity {
                 .executedVolume(execution.getExecutedVolume())
                 .status(execution.getStatus())
                 .pnlOpen(execution.getPnlOpen())
+                .pnlOpenPercentage(execution.getPnlOpenPercentage())
                 .pnlClose(execution.getPnlClose())
                 .executionsSold(getExecutionsSold(execution))
                 .build();
@@ -94,6 +98,7 @@ public class ExecutionRedisEntity {
                 .executedVolume(this.executedVolume)
                 .status(this.status)
                 .pnlOpen(this.pnlOpen)
+                .pnlOpenPercentage(this.pnlOpenPercentage)
                 .pnlClose(this.pnlClose)
                 .executionsSold(Objects.nonNull(this.executionsSold) ? this.executionsSold.stream().map(ExecutionID::from).collect(Collectors.toSet()) : new HashSet<>())
                 .build();

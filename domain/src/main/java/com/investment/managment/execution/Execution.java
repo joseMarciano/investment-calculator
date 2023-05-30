@@ -9,13 +9,13 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import static java.math.BigDecimal.ZERO;
-import static java.math.BigDecimal.valueOf;
+import static java.math.BigDecimal.*;
 import static java.util.Objects.hash;
 import static java.util.Objects.isNull;
 
@@ -43,7 +43,11 @@ public class Execution extends AggregateRoot<ExecutionID> {
 
     private BigDecimal pnlOpen;
 
+    private BigDecimal pnlOpenPercentage;
+
     private BigDecimal pnlClose;
+
+    private BigDecimal pnlClosePercentage;
 
     @Setter(AccessLevel.NONE)
     private Set<ExecutionID> executionsSold;
@@ -88,13 +92,16 @@ public class Execution extends AggregateRoot<ExecutionID> {
         return this;
     }
 
-    public BigDecimal calculatePnlClose(final BigDecimal lastTradePrice) {
-        if (ExecutionStatus.BUY.equals(this.getStatus())) return ZERO;
+    public Execution calculatePnlOpenPercentage(final BigDecimal lastTradePrice) {
+        if (ExecutionStatus.SELL.equals(this.getStatus())) {
+            this.pnlOpenPercentage = ZERO;
+            return this;
+        }
 
-        final var executedQuantity = valueOf(this.executedQuantity);
-        return executedQuantity.multiply(
-                this.executedPrice.subtract(lastTradePrice)
-        );
+        this.pnlOpenPercentage = ONE.subtract(this.executedPrice.divide(lastTradePrice, MathContext.DECIMAL32));
+
+        return this;
+
     }
 
     public void addExecutionSold(final ExecutionID anId) {

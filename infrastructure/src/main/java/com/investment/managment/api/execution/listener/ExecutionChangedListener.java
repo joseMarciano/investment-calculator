@@ -82,7 +82,8 @@ public class ExecutionChangedListener {
                 executionDTO.executedPrice(),
                 executionDTO.executedVolume(),
                 executionDTO.status(),
-                executionDTO.pnlClose()
+                executionDTO.pnlClose(),
+                executionDTO.pnlClosePercentage()
         ));
 
         handlerExecutionsSold(executionDTO, execution -> execution.addExecutionSold(executionDTO.id()));
@@ -111,7 +112,9 @@ public class ExecutionChangedListener {
                         executionDTO.executedVolume(),
                         executionDTO.status(),
                         execution.getExecutionsSold(),
-                        execution.getPnlClose())));
+                        executionDTO.pnlClose(),
+                        executionDTO.pnlClosePercentage()
+                )));
     }
 
     private void resolveExecutionDeleted(final ExecutionChangedRequest request) {
@@ -124,7 +127,7 @@ public class ExecutionChangedListener {
                 .map(ExecutionRedisEntity::toAggregate)
                 .ifPresent(it -> {
                     this.deleteExecutionByIdUseCase.execute(DeleteExecutionByIdCommandInput.with(executionDTO.id()));
-                    handlerExecutionsSold(ExecutionDTO.with(it.getId(), it.getOrigin(), it.getStatus(), it.getPnlClose()), execution -> execution.removeExecutionSold(executionDTO.id()));
+                    handlerExecutionsSold(ExecutionDTO.with(it.getId(), it.getOrigin(), it.getStatus()), execution -> execution.removeExecutionSold(executionDTO.id()));
                 });
     }
 
@@ -152,7 +155,7 @@ public class ExecutionChangedListener {
                 execution.getExecutedVolume(),
                 execution.getStatus(),
                 execution.getExecutionsSold(),
-                execution.getPnlClose()
-        ));
+                execution.getPnlClose(),
+                executionDTO.pnlClosePercentage()));
     }
 }

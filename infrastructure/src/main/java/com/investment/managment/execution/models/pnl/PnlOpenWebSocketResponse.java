@@ -4,6 +4,6 @@ import java.math.BigDecimal;
 
 public record PnlOpenWebSocketResponse(
         String executionID,
-        BigDecimal pnl
-) {
+        BigDecimal pnl,
+        BigDecimal pnlOpenPercentage) {
 }

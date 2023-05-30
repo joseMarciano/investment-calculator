@@ -30,7 +30,7 @@ public class PnLOpenCalculationUseCase extends UseCase<PnLOpenCommandInput, PnLO
     public PnLOpenCommandOutput execute(final PnLOpenCommandInput input) {
         return this.executionGateway.findById(input.id())
                 .map(this::calculate)
-                .orElse(PnLOpenCommandOutput.with(input.id(), ZERO));
+                .orElse(PnLOpenCommandOutput.with(input.id(), ZERO, ZERO));
     }
 
     private PnLOpenCommandOutput calculate(final Execution execution) {
@@ -44,6 +44,7 @@ public class PnLOpenCalculationUseCase extends UseCase<PnLOpenCommandInput, PnLO
                 .toList();
 
         execution.calculatePnlOpen(lastTradePrice, executionsSold);
+        execution.calculatePnlOpenPercentage(lastTradePrice);
 
         final var executionUpdated = executionGateway
                 .update(execution);
@@ -52,7 +53,8 @@ public class PnLOpenCalculationUseCase extends UseCase<PnLOpenCommandInput, PnLO
 
         return PnLOpenCommandOutput.with(
                 execution.getId(),
-                executionUpdated.getPnlOpen()
+                executionUpdated.getPnlOpen(),
+                executionUpdated.getPnlOpenPercentage()
         );
     }
 

@@ -6,12 +6,15 @@ import java.math.BigDecimal;
 
 public record PnLOpenCommandOutput(
         ExecutionID id,
-        BigDecimal pnl
-) {
-    public static PnLOpenCommandOutput with(final ExecutionID anId, final BigDecimal pnl) {
+        BigDecimal pnl,
+        BigDecimal pnlOpenPercentage) {
+    public static PnLOpenCommandOutput with(final ExecutionID anId,
+                                            final BigDecimal pnl,
+                                            final BigDecimal pnlOpenPercentage) {
         return new PnLOpenCommandOutput(
                 anId,
-                pnl
+                pnl,
+                pnlOpenPercentage
         );
     }
 }

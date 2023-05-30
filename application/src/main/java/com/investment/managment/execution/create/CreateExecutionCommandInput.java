@@ -17,7 +17,8 @@ public record CreateExecutionCommandInput(
         BigDecimal executedPrice,
         BigDecimal executedVolume,
         ExecutionStatus status,
-        BigDecimal pnlClose) {
+        BigDecimal pnlClose,
+        BigDecimal pnlClosePercentage) {
 
     public static CreateExecutionCommandInput with(
             final ExecutionID id,
@@ -29,7 +30,8 @@ public record CreateExecutionCommandInput(
             final BigDecimal executedPrice,
             final BigDecimal executedVolume,
             final ExecutionStatus status,
-            final BigDecimal pnlClose) {
+            final BigDecimal pnlClose,
+            final BigDecimal pnlClosePercentage) {
         return new CreateExecutionCommandInput(id,
                 origin,
                 stockId,
@@ -39,6 +41,7 @@ public record CreateExecutionCommandInput(
                 executedPrice,
                 executedVolume,
                 status,
-                pnlClose);
+                pnlClose,
+                pnlClosePercentage);
     }
 }

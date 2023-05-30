@@ -21,6 +21,6 @@ public class ExecutionNotificationImpl implements ExecutionNotification {
 
     @Override
     public void notifyPnlOpen(final Execution execution) {
-        this.queueMessagingTemplate.convertAndSend(this.pnlOpenQueue, PnlNotificationRequest.with(execution.getId().getValue(), execution.getPnlOpen()));
+        this.queueMessagingTemplate.convertAndSend(this.pnlOpenQueue, PnlNotificationRequest.with(execution.getId().getValue(), execution.getPnlOpen(), execution.getPnlOpenPercentage()));
     }
 }
